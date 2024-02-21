@@ -1,0 +1,18 @@
+name: Deactivate Paperspace Instance
+
+on:
+  [workflow_dispatch, workflow_call]
+jobs:
+  deactivate-instance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up CLI and Deactivate Instance
+        run: |
+          curl -fsSL https://console.paperspace.com/install.sh | sh
+          export PAPERSPACE_INSTALL="/home/runner/.paperspace"
+          export PATH="$PAPERSPACE_INSTALL/bin:$PATH"
+          pspace login ${{ secrets.PAPERSPACE_API_KEY }}
+          pspace machine stop ${{ secrets.PAPERSPACE_MACHINE_ID }}

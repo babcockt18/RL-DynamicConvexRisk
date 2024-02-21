@@ -1,0 +1,26 @@
+name: Launch Lambda Instance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: List Instances
+        run: |
+          curl -X GET 'https://cloud.lambdalabs.com/api/v1/instances' \
+            -H 'Authorization: Bearer ${secrets.LAMBDA_LABS_API_KEY}' > instances.json
+          INSTANCE_IDS=$(jq '.data[].id' instances.json | tr -d '"')
+      - name: Terminate Instances
+        run: |
+          curl -X POST 'https://cloud.lambdalabs.com/api/v1/instance-operations/terminate' \
+            -H 'Authorization: Bearer ${secrets.LAMBDA_LABS_API_KEY}'
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"instance_ids\": [${INSTANCE_IDS}]
+            }"
+        env:
+          LambdaCloudKey: ${{ secrets.LAMBDA_LABS_SSH_KEY }}

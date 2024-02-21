@@ -1,0 +1,16 @@
+name: Launch Lambda Instance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Launch Instance
+        run: |
+          curl -u ${{ secrets.LAMBDA_LABS_API_KEY }}: https://cloud.lambdalabs.com/api/v1/instance-operations/launch -d @requests/launch.json -H "Content-Type: application/json" | jq .
+        env:
+          LambdaCloudKey: ${{ secrets.LAMBDA_LABS_SSH_KEY }}
