@@ -25,6 +25,7 @@ import time
 import os
 import pdb # use with set_trace() for the debugger
 from datetime import datetime
+import wandb
 
 """
 Parameters
@@ -40,13 +41,21 @@ alpha_cvar = [-99, 0.2, 0.2] # threshold for the conditional value-at-risk
 kappa_semidev = [-99, -99, 0.2] # coefficient for the mean semideviation
 r_semidev = [-99, -99, -99] # exponent of the mean-semideviation
 
+
+
 # parameters for the model and algorithm
 repo_name, envParams, algoParams = hyperparams.initParams()
+
+# initialize wandb
+wandb.init(project=repo_name, entity='your_wandb_username')
+
+# set initial config for wandb
+wandb.config.update(envParams.update(algoParams))
 
 print_progress = 200 # number of epochs before printing the time/loss
 plot_progress = 50 # number of epochs before plotting the policy/value function
 save_progress = 100 # number of epochs before saving the policy/value function ANNs
-                    
+
 """
 End of Parameters
 """
@@ -109,7 +118,7 @@ for idx_method, method in enumerate(rm_list):
                             n_layers=algoParams["layers_V"],
                             hidden_size=algoParams["hidden_V"],
                             learn_rate=algoParams["lr_V"])
-    
+
     # initialize the actor-critic algorithm
     actor_critic = ActorCriticPG(repo=repo,
                                     method = method,
@@ -146,7 +155,7 @@ for idx_method, method in enumerate(rm_list):
                                     batch_size=algoParams["batch_V"],
                                     Nepochs=algoParams["Nepochs_V"],
                                     rng_seed=algoParams["seed"])
-        
+
         # update the policy by policy gradient
         actor_critic.update_policy(Ntrajectories=algoParams["Ntrajectories"],
                                     Mtransitions=algoParams["Mtransitions"],
@@ -156,6 +165,7 @@ for idx_method, method in enumerate(rm_list):
 
         # print progress
         if epoch % print_progress == 0 or epoch == algoParams["Nepochs"] - 1:
+            wandb.log({'epoch': epoch, 'loss': loss, 'reward': reward})
             print('*** Epoch = ', str(epoch) ,
                     ' completed, Duration = ', "{:.3f}".format(time.time() - start_time), ' secs ***')
             start_time = time.time()
