@@ -48,9 +48,9 @@ repo_name, envParams, algoParams = hyperparams.initParams()
 
 # initialize wandb
 wandb.init(project='Rl-DynamicConvexRisk', entity='babcockt18')
-
+envParams.update(algoParams)
 # set initial config for wandb
-wandb.config.update(envParams.update(algoParams))
+wandb.config.update(envParams)
 
 print_progress = 200 # number of epochs before printing the time/loss
 plot_progress = 50 # number of epochs before plotting the policy/value function
