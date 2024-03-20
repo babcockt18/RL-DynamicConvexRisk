@@ -47,7 +47,7 @@ r_semidev = [-99, -99, -99] # exponent of the mean-semideviation
 repo_name, envParams, algoParams = hyperparams.initParams()
 
 # initialize wandb
-wandb.init(project=repo_name, entity='your_wandb_username')
+wandb.init(project='Rl-DynamicConvexRisk', entity='babcockt18')
 
 # set initial config for wandb
 wandb.config.update(envParams.update(algoParams))
@@ -165,7 +165,7 @@ for idx_method, method in enumerate(rm_list):
 
         # print progress
         if epoch % print_progress == 0 or epoch == algoParams["Nepochs"] - 1:
-            wandb.log({'epoch': epoch, 'loss': loss, 'reward': reward})
+            # wandb.log({'epoch': epoch, 'loss': loss, 'reward': reward})
             print('*** Epoch = ', str(epoch) ,
                     ' completed, Duration = ', "{:.3f}".format(time.time() - start_time), ' secs ***')
             start_time = time.time()
@@ -183,13 +183,18 @@ for idx_method, method in enumerate(rm_list):
                     repo + '/' + method + '/policy_model' + '-' + str(now.hour) + '-' + str(now.minute) + '-' + str(now.second) + '.pt')
             T.save(actor_critic.V.state_dict(),
                     repo + '/' + method + '/V_model' + '-' + str(now.hour) + '-' + str(now.minute) + '-' + str(now.second) + '.pt')
+            wandb.save(repo + '/' + method + '/policy_model' + '-' + str(now.hour) + '-' + str(now.minute) + '-' + str(now.second) + '.pt')
+            wandb.save(repo + '/' + method + '/V_model' + '-' + str(now.hour) + '-' + str(now.minute) + '-' + str(now.second) + '.pt')
 
     # save the neural network
     T.save(actor_critic.policy.state_dict(),
             repo + '/' + method + '/policy_model.pt')
     T.save(actor_critic.V.state_dict(),
             repo + '/' + method + '/V_model.pt')
+    wandb.save(repo + '/' + method + '/policy_model.pt')
+    wandb.save(repo + '/' + method + '/V_model.pt')
     # to load the model, M = ModelClass(*args, **kwargs); M.load_state_dict(T.load(PATH))
 
     # print progress
     print('*** Training phase completed! ***')
+    wandb.finish()
